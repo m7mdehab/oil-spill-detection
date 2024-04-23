@@ -26,31 +26,40 @@ def predict(image, model_name):
     predictions = model.predict(image)
     
     if predictions.ndim > 2:
-        # Convert predictions to class indices per pixel
         predictions = np.argmax(predictions, axis=-1)
         unique, counts = np.unique(predictions, return_counts=True)
         total_pixels = predictions.size
-        # Calculate percentage of each class
-        prediction_percentages = {class_labels.get(int(k), "Unknown class"): (v / total_pixels * 100) for k, v in zip(unique, counts)}
-        
-        # Detect Oil Spill
+
+        prediction_percentages = {
+            class_labels.get(int(k), "Unknown class"): (v / total_pixels * 100)
+            for k, v in zip(unique, counts)
+        }
+
         oil_spill_percentage = prediction_percentages.get("Oil Spill Pixels", 0)
         if oil_spill_percentage > 0:
             st.markdown("<span style='color: red;'>Oil Spill Detected</span>", unsafe_allow_html=True)
         else:
             st.markdown("<span style='color: green;'>No Oil Spill Detected</span>", unsafe_allow_html=True)
-        
-        # Display percentages after the message
+
         st.write("Percentage of each class in the image:", prediction_percentages)
 
-        # Find the most frequent class
-        predicted_class = np.bincount(predictions.flatten()).argmax()
-        predicted_class = int(predicted_class)  # Ensure it is a native Python int
-    else:
-        predicted_classes = np.argmax(predictions, axis=-1)
-        predicted_class = int(predicted_classes[0])  # Convert to Python int
+        # Display the RGB image
+        color_image = create_color_image(predictions)
+        st.image(color_image, caption='Classified Image', use_column_width=True)
 
-    return class_labels.get(predicted_class, "Unknown class")
+def create_color_image(predictions):
+    class_to_color = {
+        0: [0, 0, 0],      # Black for Sea Surface
+        1: [0, 255, 255],  # Cyan for Oil Spill
+        2: [255, 0, 0],    # Red for Look-alike
+        3: [165, 42, 42],  # Brown for Ship
+        4: [0, 128, 0]     # Green for Land
+    }
+    color_image = np.zeros((*predictions.shape, 3), dtype=np.uint8)
+    for class_value, color in class_to_color.items():
+        color_image[predictions == class_value] = color
+    return color_image
+
 
 class_labels = {
     0: "Sea Surface Pixels",
