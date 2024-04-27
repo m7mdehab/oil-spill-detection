@@ -2,6 +2,17 @@ import streamlit as st
 from PIL import Image
 import model_functions
 import time  # for simulating a delay in progress bar
+import requests
+from io import BytesIO
+
+def load_image_from_url(url):
+    try:
+        response = requests.get(url)
+        response.raise_for_status()  # Raises an HTTPError for bad responses
+        return Image.open(BytesIO(response.content))
+    except requests.RequestException as e:
+        st.error(f"Failed to load image from URL: {url}. Error: {e}")
+        return None
 
 def main():
     st.set_page_config(page_title="Oil Spill Detection", page_icon="🌊")
@@ -10,24 +21,24 @@ def main():
     # Let the user upload their own image or select a sample image
     uploaded_file = st.file_uploader("Upload a SAR image, or select a sample image below:", type=["jpg", "jpeg", "png"])
 
-    # Define sample images (assuming these are paths to images in your project directory)
+    # Define sample images with URLs
     sample_images = {
-        "Sample 1": "/workspaces/oil-spill-detection/Image 1.jpg",
-        "Sample 2": "/workspaces/oil-spill-detection/Image 2.jpg",
-        "Sample 3": "/workspaces/oil-spill-detection/Image 3.png",
-        "Sample 4": "/workspaces/oil-spill-detection/Image 4.png",
-        "Sample 5": "/workspaces/oil-spill-detection/Image 5.jpg",
+        "Sample 1": "https://raw.githubusercontent.com/m7mdehab/oil-spill-detection/428fe74bab9f11e400dea26db50b33a637d80da4/Image%201.jpg",
+        "Sample 2": "https://raw.githubusercontent.com/m7mdehab/oil-spill-detection/428fe74bab9f11e400dea26db50b33a637d80da4/Image%202.jpg",
+        "Sample 3": "https://raw.githubusercontent.com/m7mdehab/oil-spill-detection/428fe74bab9f11e400dea26db50b33a637d80da4/Image%203.png",
+        "Sample 4": "https://raw.githubusercontent.com/m7mdehab/oil-spill-detection/428fe74bab9f11e400dea26db50b33a637d80da4/Image%204.png",
+        "Sample 5": "https://raw.githubusercontent.com/m7mdehab/oil-spill-detection/428fe74bab9f11e400dea26db50b33a637d80da4/Image%205.jpg"
     }
 
-    # User can choose from sample images if no file is uploaded
-    if not uploaded_file:
-        sample_selection = st.radio("Or choose from sample images:", list(sample_images.keys()))
-        image_path = sample_images[sample_selection]
-        image = Image.open(image_path)
-        st.image(image, caption=f'Selected Image: {sample_selection}', use_column_width=True)
-    else:
+    if uploaded_file:
         image = Image.open(uploaded_file)
         st.image(image, caption='Uploaded Image', use_column_width=True)
+    else:
+        sample_selection = st.radio("Or choose from sample images:", list(sample_images.keys()))
+        image_url = sample_images[sample_selection]
+        image = load_image_from_url(image_url)
+        if image:
+            st.image(image, caption=f'Selected Image: {sample_selection}', use_column_width=True)
 
     # Ensure an image is selected or uploaded to enable model selection and detection
     if image:
@@ -45,9 +56,11 @@ def main():
                 progress_bar.progress(i + 1)
                 time.sleep(0.005)  # Simulate processing time
             # Call the prediction function
-            st.success('Detection complete!')
             label = model_functions.predict(image, model_option)
             progress_bar.progress(100)
+            st.success('Detection complete!')
+            # Optionally display the results
+            st.write(f'Detection Results: {label}')
 
 if __name__ == "__main__":
     main()
