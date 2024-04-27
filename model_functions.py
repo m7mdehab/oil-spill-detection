@@ -86,6 +86,9 @@ def process_predictions(predictions):
 
     st.write("Percentage of each class in the image:", prediction_percentages)
 
+    color_image = create_color_image(predictions)
+    st.image(color_image, caption='Classified Image', use_column_width=True)  # Make sure this line is executed
+
 def create_color_image(predictions):
     class_to_color = {
         0: [0, 0, 0],      # Black for Sea Surface
