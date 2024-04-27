@@ -7,12 +7,14 @@ def main():
         ## Deep Learning Models for Detection
         This application uses state-of-the-art deep learning models to identify and classify various features in satellite images. The models used include:
         
+        - **DeeplabV3+**: Utilizes advanced techniques for semantic image segmentation. Known for its high accuracy and ability to deal with complex segmentation tasks, making it recommended for challenging scenes.
         - **U-Net**: Primarily used for precise segmentation tasks. It's effective in distinguishing complex features in images.
-        - **SegNet**: Known for its efficiency in segmenting image pixels into categorically distinct classes.
         - **FCN (Fully Convolutional Network)**: Adapts classical neural networks for pixel-wise segmentation.
+        - **SegNet**: Known for its efficiency in segmenting image pixels into categorically distinct classes.
+
         
         ## Classes and RGB Color Coding
-        The models classify the image pixels into five different classes each represented with a specific color:
+        The models classify the image pixels into five different classes, each represented with a specific color:
         
         - **Sea Surface Pixels** (Black): Representing water surfaces without any contamination.
         - **Oil Spill Pixels** (Cyan): Indicating the presence of oil spills.
@@ -26,7 +28,6 @@ def main():
         The percentage of each class present in the image is also displayed, providing a quantitative measure of the analysis.
                 
         Select the 'Oil Spill Detector' from the sidebar to get started and classify your own SAR images!
-
     """)
 
 if __name__ == "__main__":
