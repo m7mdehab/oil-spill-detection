@@ -12,12 +12,15 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 def get_model_path(relative_path):
     return os.path.join(os.path.dirname(__file__), relative_path)
 
-# Load TensorFlow Lite model
 def load_tflite_model(model_path):
     full_path = get_model_path(model_path)
+    print("Attempting to load model from:", full_path)  # Debugging output
+    if not os.path.exists(full_path):
+        raise FileNotFoundError(f"The specified model file was not found: {full_path}")
     interpreter = tf.lite.Interpreter(model_path=full_path)
     interpreter.allocate_tensors()
     return interpreter
+
 
 # Dictionary to hold models
 models = {
