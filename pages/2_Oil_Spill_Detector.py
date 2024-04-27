@@ -54,13 +54,11 @@ def main():
             # Simulate the detection process and update progress
             for i in range(100):
                 progress_bar.progress(i + 1)
-                time.sleep(0.005)  # Simulate processing time
+                time.sleep(0.001)  # Simulate processing time
             # Call the prediction function
             label = model_functions.predict(image, model_option)
             progress_bar.progress(100)
             st.success('Detection complete!')
-            # Optionally display the results
-            st.write(f'Detection Results: {label}')
 
 if __name__ == "__main__":
     main()
