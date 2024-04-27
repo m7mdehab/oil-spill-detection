@@ -44,7 +44,7 @@ def main():
     if image:
         model_option = st.selectbox(
             'Which detection algorithm would you like to use?',
-            ('DeeplabV3+ (Recommended)', 'U-Net', 'SegNet', 'FCN'),
+            ('DeeplabV3+ (Recommended)', 'U-Net', 'FCN', 'SegNet'),
             key='model_selector'
         )
 
