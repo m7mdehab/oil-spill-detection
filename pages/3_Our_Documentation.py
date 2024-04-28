@@ -16,11 +16,11 @@ def main():
         contributing significantly to environmental protection efforts.
     """)
 
-    # Placeholder for the PDF link
+    # Placeholder for the PDF link updated with the direct download link
     st.header("Full Research Paper")
     st.markdown("""
         Read the complete research paper for detailed insights into the methodologies, data analysis, and results. 
-        [Download the full paper](#)  # Replace '#' with the actual link to your PDF
+        [Download the full paper](https://drive.google.com/uc?export=download&id=1HzFIu3hNLMeeY__CL66ybPbM32SIHZ17)
     """)
 
 if __name__ == "__main__":
