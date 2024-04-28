@@ -19,14 +19,15 @@ def main():
         - **Solar Irradiation Analysis**: Assess the solar energy potential based on historical and geographical data.
         - **Terrain Evaluation**: Consider the slope and terrain type which affect solar panel placement and construction.
         - **Infrastructure Assessment**: Evaluate proximity to essential infrastructure like transmission lines and roads.
-        - **Recommendations**: Generate recommendations for the user on the criteria that needs to improve to produce better results.
+        - **Recommendations**: Generate recommendations for the user on the criteria that need to improve to produce better results.
     """)
 
-    # Placeholder for the app download link
+    # App download link
     st.header("Download the App")
     st.markdown("""
         Ready to explore solar potential in your area? Download our Solar Cell Site Selection app to get started:
-        [Download the app](#)  # Replace '#' with the actual link to your mobile app
+        [Download the app](https://github.com/m7mdehab/oil-spill-detection/raw/main/Solar_App.apk)
+        \n\n**Note**: This application is currently available only for Android devices.
     """)
 
 if __name__ == "__main__":
