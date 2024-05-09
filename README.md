@@ -1,6 +1,6 @@
 # Oil Spill Detector Web Application
 
-Welcome to the Oil Spill Detector Web Application! This application is designed to help users detect oil spills using satellite imagery, leveraging advanced machine learning models.
+Welcome to the Oil Spill Detector Web Application! This application is designed to help users detect oil spills using satellite imagery, leveraging advanced machine learning and deep learning models.
 
 ## About This App
 
