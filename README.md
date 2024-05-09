@@ -1,7 +1,17 @@
-# Welcome to streamlit
+# Oil Spill Detector Web Application
 
-This is the app you get when you run `streamlit hello`, extracted as its own app.
+Welcome to the Oil Spill Detector Web Application! This application is designed to help users detect oil spills using satellite imagery, leveraging advanced machine learning models.
 
-Edit [Hello.py](./Hello.py) to customize this app to your heart's desire. ❤️
+## About This App
 
-Check it out on [Streamlit Community Cloud](https://st-hello-app.streamlit.app/)
+The Oil Spill Detector Web Application introduces users to the field of satellite image analysis for environmental monitoring. It uses deep learning models to identify and classify oil spills, enhancing efforts towards marine and coastal conservation.
+
+## Getting Started
+
+To start using and customizing this application, clone this repository. 
+Customize the existing scripts to adapt or extend the functionalities according to your needs.
+
+### Prerequisites
+
+Before you begin, ensure you have the following installed:
+- Python 3.6 or later
