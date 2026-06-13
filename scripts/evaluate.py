@@ -157,7 +157,9 @@ def main(argv: list[str] | None = None) -> int:
     )
     result = output.result
 
-    # Metrics JSON -- the single source for every number in the docs.
+    # Metrics JSON -- the single source for every number in the docs. A copy is
+    # written under docs/results/ (committed) so every figure in docs/results.md
+    # remains traceable from a fresh clone, where artifacts/ is gitignored.
     json_path = out_dir / "metrics.json"
     meta = {
         "run_name": run_name,
@@ -170,6 +172,9 @@ def main(argv: list[str] | None = None) -> int:
         "device": str(device),
     }
     write_results_json(result, json_path, meta)
+    committed_json = args.results_md.parent / "results" / f"{run_name}.json"
+    committed_json.parent.mkdir(parents=True, exist_ok=True)
+    write_results_json(result, committed_json, meta)
 
     # Figures.
     cm_path = out_dir / "confusion_matrix.png"
@@ -194,7 +199,7 @@ def main(argv: list[str] | None = None) -> int:
         args.results_md,
         run_name,
         result,
-        json_path,
+        committed_json,
         tag=args.tag,
         num_images=output.num_images,
     )

@@ -1,0 +1,100 @@
+{
+  "meta": {
+    "run_name": "run-20260613-101720",
+    "tag": "smoke",
+    "source": "artifacts/checkpoints/run-20260613-101720/best.pt",
+    "source_type": "checkpoint",
+    "split": "test",
+    "image_size": [
+      256,
+      256
+    ],
+    "num_images": 30,
+    "device": "cpu"
+  },
+  "metrics": {
+    "class_names": [
+      "Sea Surface",
+      "Oil Spill",
+      "Look-alike",
+      "Ship",
+      "Land"
+    ],
+    "confusion_matrix": [
+      [
+        1606891,
+        170,
+        46962,
+        31,
+        159251
+      ],
+      [
+        19749,
+        35,
+        4477,
+        0,
+        366
+      ],
+      [
+        30344,
+        96,
+        28182,
+        1,
+        86
+      ],
+      [
+        345,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        11583,
+        0,
+        0,
+        0,
+        57511
+      ]
+    ],
+    "per_class": {
+      "iou": {
+        "Sea Surface": 0.8568595540188746,
+        "Oil Spill": 0.0014060177559956613,
+        "Look-alike": 0.2558557577078113,
+        "Ship": 0.0,
+        "Land": 0.25136256157204856
+      },
+      "precision": {
+        "Sea Surface": 0.962837465366658,
+        "Oil Spill": 0.11627906976744186,
+        "Look-alike": 0.35395184687456827,
+        "Ship": 0.0,
+        "Land": 0.26476654359295443
+      },
+      "recall": {
+        "Sea Surface": 0.8861669713589275,
+        "Oil Spill": 0.0014212043691882892,
+        "Look-alike": 0.4800286157147967,
+        "Ship": 0.0,
+        "Land": 0.8323588155266738
+      },
+      "f1": {
+        "Sea Surface": 0.9229126157272795,
+        "Oil Spill": 0.0028080872913992297,
+        "Look-alike": 0.40746042073302974,
+        "Ship": 0.0,
+        "Land": 0.4017421797504785
+      }
+    },
+    "aggregate": {
+      "mean_iou": 0.273096778210946,
+      "macro_precision": 0.33956698512032457,
+      "macro_recall": 0.4399951213939173,
+      "macro_f1": 0.3469846607004373,
+      "pixel_accuracy": 0.8609105428059896,
+      "oil_iou": 0.0014060177559956613,
+      "oil_recall": 0.0014212043691882892
+    }
+  }
+}

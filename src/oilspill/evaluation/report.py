@@ -21,6 +21,11 @@ from oilspill.metrics import MetricResult
 
 TABLE_BEGIN = "<!-- RESULTS_TABLE_BEGIN -->"
 TABLE_END = "<!-- RESULTS_TABLE_END -->"
+DETAIL_BEGIN = "<!-- RESULTS_DETAIL_BEGIN -->"
+DETAIL_END = "<!-- RESULTS_DETAIL_END -->"
+
+_PER_CLASS_HEADER = "| Class | IoU | Precision | Recall | F1 |"
+_PER_CLASS_DIVIDER = "| --- | --- | --- | --- | --- |"
 
 _TABLE_HEADER = (
     "| Run | Tag | Oil IoU | Oil recall | Mean IoU | Macro F1 | "
@@ -33,9 +38,10 @@ _DOC_HEADER = """# Results
 This file is **auto-generated** by `scripts/evaluate.py`. Do not edit the table by
 hand: re-running the evaluation harness updates the row for a given run in place.
 
-Every number in the table below is read directly from a metrics JSON written under
-`artifacts/eval/<run>/metrics.json` by the same run, so each figure is traceable to
-a committed artifact. "Pixel acc." is the overall pixel accuracy (all classes); it
+Every number in the table below is read directly from a metrics JSON committed at
+`docs/results/<run>.json` (a copy is also written under `artifacts/eval/<run>/` with
+the figures), so each figure is traceable from a fresh clone. "Pixel acc." is the
+overall pixel accuracy (all classes); it
 is reported for completeness but the project is selected and judged on **Oil IoU**
 and **Oil recall**, not pixel accuracy. Runs tagged `smoke` come from short
 CPU sanity runs on a tiny subset and are **not** representative of model quality.
@@ -85,7 +91,18 @@ def _format_row(
 
 
 def _empty_table() -> list[str]:
-    return [TABLE_BEGIN, "", _TABLE_HEADER, _TABLE_DIVIDER, TABLE_END]
+    return [
+        TABLE_BEGIN,
+        "",
+        _TABLE_HEADER,
+        _TABLE_DIVIDER,
+        TABLE_END,
+        "",
+        "## Per-class metrics",
+        "",
+        DETAIL_BEGIN,
+        DETAIL_END,
+    ]
 
 
 def _parse_rows(lines: list[str]) -> dict[str, str]:
@@ -110,6 +127,51 @@ def _parse_rows(lines: list[str]) -> dict[str, str]:
         if cells:
             rows[cells[0]] = stripped
     return rows
+
+
+def _format_per_class_block(run_name: str, tag: str, result: MetricResult) -> list[str]:
+    """A per-class IoU/precision/recall/F1 table for one run (nan rendered '-')."""
+
+    def fmt(value: float) -> str:
+        return "-" if value != value else f"{value:.4f}"  # NaN != NaN
+
+    heading = f"#### {run_name}" + (f" ({tag})" if tag else "")
+    lines = [heading, "", _PER_CLASS_HEADER, _PER_CLASS_DIVIDER]
+    for i, name in enumerate(result.class_names):
+        lines.append(
+            f"| {name} | {fmt(float(result.iou[i]))} | {fmt(float(result.precision[i]))} | "
+            f"{fmt(float(result.recall[i]))} | {fmt(float(result.f1[i]))} |"
+        )
+    lines.append("")
+    return lines
+
+
+def _parse_detail_blocks(lines: list[str]) -> dict[str, list[str]]:
+    """Map run name -> its per-class block lines, between the detail markers."""
+    blocks: dict[str, list[str]] = {}
+    inside = False
+    current: str | None = None
+    for line in lines:
+        if line.strip() == DETAIL_BEGIN:
+            inside = True
+            continue
+        if line.strip() == DETAIL_END:
+            inside = False
+            current = None
+            continue
+        if not inside:
+            continue
+        if line.startswith("#### "):
+            current = line[len("#### ") :].split(" (")[0].strip()
+            blocks[current] = [line]
+        elif current is not None:
+            blocks[current].append(line)
+    # Trim trailing blank lines in each block.
+    for name, block in blocks.items():
+        while block and not block[-1].strip():
+            block.pop()
+        blocks[name] = block
+    return blocks
 
 
 def update_results_markdown(
@@ -143,32 +205,42 @@ def update_results_markdown(
     if TABLE_BEGIN not in text or TABLE_END not in text:
         # Append a fresh table if the markers are missing.
         text = text.rstrip() + "\n\n" + "\n".join(_empty_table()) + "\n"
+    if DETAIL_BEGIN not in text or DETAIL_END not in text:
+        detail_scaffold = f"## Per-class metrics\n\n{DETAIL_BEGIN}\n{DETAIL_END}\n"
+        text = text.rstrip() + "\n\n" + detail_scaffold
 
     lines = text.splitlines()
+
     rows = _parse_rows(lines)
     rows[run_name] = _format_row(run_name, tag, result, num_images, json_str, date)
-
     sorted_rows = [rows[name] for name in sorted(rows)]
     new_table = [TABLE_BEGIN, "", _TABLE_HEADER, _TABLE_DIVIDER, *sorted_rows, "", TABLE_END]
 
-    # Replace the existing marker block with the rebuilt table.
+    blocks = _parse_detail_blocks(lines)
+    blocks[run_name] = _format_per_class_block(run_name, tag, result)
+    detail_body: list[str] = []
+    for name in sorted(blocks):
+        detail_body.extend(blocks[name])
+        detail_body.append("")
+    new_detail = [DETAIL_BEGIN, "", *detail_body, DETAIL_END]
+
+    # Replace the table and detail marker blocks with the rebuilt versions.
     out_lines: list[str] = []
-    inside = False
-    replaced = False
+    skip_until: str | None = None
     for line in lines:
+        if skip_until is not None:
+            if line.strip() == skip_until:
+                skip_until = None
+            continue
         if line.strip() == TABLE_BEGIN:
-            inside = True
             out_lines.extend(new_table)
-            replaced = True
+            skip_until = TABLE_END
             continue
-        if line.strip() == TABLE_END:
-            inside = False
-            continue
-        if inside:
+        if line.strip() == DETAIL_BEGIN:
+            out_lines.extend(new_detail)
+            skip_until = DETAIL_END
             continue
         out_lines.append(line)
-    if not replaced:
-        out_lines.extend(["", *new_table])
 
     results_md_path.write_text("\n".join(out_lines).rstrip() + "\n", encoding="utf-8")
     return results_md_path
