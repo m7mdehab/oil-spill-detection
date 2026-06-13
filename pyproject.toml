@@ -1,0 +1,95 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "oilspill"
+version = "0.1.0"
+description = "SAR oil spill detection: training, evaluation, Sentinel-1 pipeline, and web API"
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.11"
+dependencies = [
+    # Deep learning
+    "torch",
+    "torchvision",
+    "segmentation-models-pytorch",
+    "transformers",
+    "torchmetrics",
+    # Core scientific stack
+    "numpy",
+    "scipy",
+    "pillow",
+    "matplotlib",
+    "pyyaml",
+    # Augmentation
+    "albumentations",
+    # Experiment tracking
+    "mlflow",
+    # Inference / serving
+    "onnx",
+    "onnxruntime",
+    "fastapi",
+    "uvicorn",
+    "python-multipart",
+    "pydantic",
+    "pydantic-settings",
+    "httpx",
+    # Geospatial / SAR
+    "rasterio",
+    "rioxarray",
+    "geopandas",
+    "shapely",
+    "pyproj",
+    "xarray",
+    "xarray-sentinel",
+    "sarsen",
+    # Utilities
+    "requests",
+    "tqdm",
+    "python-dotenv",
+]
+
+[dependency-groups]
+dev = [
+    "ruff",
+    "pyright",
+    "pytest",
+    "pytest-cov",
+    "pre-commit",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/oilspill"]
+
+# Local and CI installs are CPU-only by design; GPU training runs on a remote
+# service with its own image. Pin torch/torchvision to the CPU wheel index.
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[tool.uv.sources]
+torch = [{ index = "pytorch-cpu" }]
+torchvision = [{ index = "pytorch-cpu" }]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "SIM", "RUF"]
+
+[tool.pyright]
+typeCheckingMode = "basic"
+include = ["src", "tests"]
+pythonVersion = "3.11"
+venvPath = "."
+venv = ".venv"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+markers = [
+    "slow: slow tests (full training, large downloads)",
+]

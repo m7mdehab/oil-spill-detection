@@ -1,17 +1,25 @@
-# Oil Spill Detector Web Application
+# Oil Spill Detection from Sentinel-1 SAR
 
-Welcome to the Oil Spill Detector Web Application! This application is designed to help users detect oil spills using satellite imagery, leveraging advanced machine learning and deep learning models.
+Semantic segmentation of oil spills in Sentinel-1 SAR imagery. The project
+covers the full stack: model training and evaluation, a scene-processing
+pipeline (download, calibration, tiling, inference), and a web API with a
+frontend for interactive detection.
 
-## About This App
+Status: under active development — modernization of the original 2024
+graduation project (see the `legacy-archive` branch).
 
-The Oil Spill Detector Web Application introduces users to the field of satellite image analysis for environmental monitoring. It uses deep learning models to identify and classify oil spills, enhancing efforts towards marine and coastal conservation.
+## Quickstart
 
-## Getting Started
+Requires [uv](https://docs.astral.sh/uv/) and GNU Make.
 
-To start using and customizing this application, clone this repository. 
-Customize the existing scripts to adapt or extend the functionalities according to your needs.
+```sh
+uv sync
+make check
+```
 
-### Prerequisites
+`make check` runs lint (ruff), formatting check, type check (pyright), and the
+fast test suite.
 
-Before you begin, ensure you have the following installed:
-- Python 3.6 or later
+## License
+
+MIT — see [LICENSE](LICENSE).

@@ -1,6 +1,0 @@
-altair
-numpy
-pandas
-pydeck
-streamlit
-tensorflow==2.15.0
