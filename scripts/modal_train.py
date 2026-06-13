@@ -104,21 +104,29 @@ def train_remote(config_dict: dict[str, Any]) -> dict[str, Any]:
         "amp": True,
         "precision": "bf16",
     }
+    # Keep MLflow on fast container-local disk. The MLflow file store reads back
+    # run directories immediately after writing them, which races against a Modal
+    # Volume's eventual consistency ("Run not found"). The deliverables (checkpoint
+    # + metrics.json) are persisted to the artifacts volume and returned instead.
     config_dict["mlflow"] = {
         **config_dict.get("mlflow", {}),
-        "tracking_uri": f"{ARTIFACTS_MOUNT}/mlruns",
+        "tracking_uri": "/root/mlruns",
     }
 
     cfg = TrainConfig.model_validate(config_dict)
     print(f"CUDA available: {torch.cuda.is_available()} | device: {torch.cuda.get_device_name(0)}")
 
     result = fit(cfg)
+
+    # Persist metrics next to the checkpoints on the volume so the run is fully
+    # recoverable via `modal volume get` even if the client has disconnected.
+    metrics_json = json.dumps(result.metrics, indent=2)
+    (result.best_checkpoint.parent / "metrics.json").write_text(metrics_json, encoding="utf-8")
     artifacts_volume.commit()
 
     def _read(path: Path) -> bytes:
         return path.read_bytes() if path.exists() else b""
 
-    metrics_json = json.dumps(result.metrics, indent=2)
     return {
         "metrics": result.metrics,
         "best_metric": result.best_metric,
