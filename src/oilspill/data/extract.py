@@ -10,6 +10,7 @@ used by the loader and the analysis CLI.
 from __future__ import annotations
 
 import hashlib
+import shutil
 import zipfile
 from pathlib import Path
 
@@ -96,15 +97,43 @@ def _is_extracted(dataset_root: Path) -> bool:
     )
 
 
-def _extract_zip(archive_path: Path, dest_dir: Path) -> None:
-    """Extract ``archive_path`` into ``dest_dir`` safely (no path traversal)."""
+def _archive_root_dir(zf: zipfile.ZipFile) -> str | None:
+    """Return the single top-level directory shared by all archive members.
+
+    The published archive nests everything under one folder (e.g.
+    ``Oil Spill Detection Dataset/``). Returns that folder name, or ``None`` if
+    members do not share a single top-level directory.
+    """
+    tops = {member.split("/", 1)[0] for member in zf.namelist() if member.strip()}
+    if len(tops) == 1:
+        return next(iter(tops))
+    return None
+
+
+def _extract_zip(archive_path: Path, dest_dir: Path, dataset_dirname: str) -> None:
+    """Extract ``archive_path`` into ``dest_dir`` safely, normalising the dataset
+    folder name to ``dataset_dirname``.
+
+    The archive nests its content under a single human-named directory; after
+    extraction that directory is renamed to ``dataset_dirname`` so downstream code
+    can rely on a stable path regardless of the archive's internal naming.
+    """
     dest_dir.mkdir(parents=True, exist_ok=True)
     with zipfile.ZipFile(archive_path) as zf:
         for member in zf.namelist():
             target = (dest_dir / member).resolve()
             if not str(target).startswith(str(dest_dir.resolve())):
                 raise ValueError(f"unsafe path in archive: {member}")
+        archive_root = _archive_root_dir(zf)
         zf.extractall(dest_dir)
+
+    if archive_root is not None and archive_root != dataset_dirname:
+        extracted = dest_dir / archive_root
+        target = dest_dir / dataset_dirname
+        if extracted.is_dir():
+            if target.exists():
+                shutil.rmtree(target)
+            extracted.rename(target)
 
 
 def prepare_dataset(
@@ -146,7 +175,7 @@ def prepare_dataset(
     archive = Path(archive_path) if archive_path is not None else _DEFAULT_RAW_DIR / ARCHIVE_NAME
     if verify:
         verify_archive(archive)
-    _extract_zip(archive, datasets_dir)
+    _extract_zip(archive, datasets_dir, DATASET_DIRNAME)
 
     if not _is_extracted(dataset_root):
         raise RuntimeError(

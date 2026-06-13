@@ -199,3 +199,36 @@ def test_real_item_loads() -> None:
     assert item["mask"].shape == (320, 320)
     assert item["mask"].dtype == torch.long
     assert int(item["mask"].min()) >= 0 and int(item["mask"].max()) < NUM_CLASSES
+
+
+# --------------------------------------------------------------------------- #
+# Archive extraction (the published zip nests content under a human-named dir)
+# --------------------------------------------------------------------------- #
+def test_prepare_dataset_renames_nested_archive_dir(tmp_path: Path) -> None:
+    """The zip nests everything under e.g. 'Oil Spill Detection Dataset/';
+    prepare_dataset must normalise that to '<root>/oil_spill/'."""
+    import zipfile
+
+    from oilspill.data.extract import prepare_dataset
+
+    nested = "Oil Spill Detection Dataset"
+    raw = tmp_path / "raw"
+    raw.mkdir()
+    archive = raw / "oil_spill_dataset.zip"
+    with zipfile.ZipFile(archive, "w") as zf:
+        for split, start in (("train", 1), ("test", 1001)):
+            for i in range(start, start + 2):
+                stem = f"img_{i:04d}"
+                zf.writestr(f"{nested}/{split}/images/{stem}.jpg", b"x")
+                zf.writestr(f"{nested}/{split}/labels/{stem}.png", b"x")
+                zf.writestr(f"{nested}/{split}/labels_1D/{stem}.png", b"x")
+
+    datasets_dir = tmp_path / "datasets"
+    root = prepare_dataset(root=datasets_dir, archive_path=archive, verify=False)
+
+    assert root == datasets_dir / "oil_spill"
+    assert (root / "train" / "images").is_dir()
+    assert (root / "test" / "labels_1D").is_dir()
+    assert not (datasets_dir / nested).exists()
+    # Idempotent: a second call returns the same root without error.
+    assert prepare_dataset(root=datasets_dir, archive_path=archive, verify=False) == root
