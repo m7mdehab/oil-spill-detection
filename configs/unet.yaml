@@ -1,0 +1,60 @@
+# Full U-Net training configuration.
+#
+# ResNet-34 encoder with ImageNet pretraining, Dice+Focal loss, cosine LR
+# schedule, and early stopping on the oil-spill IoU (the headline metric). Run
+# this on GPU; locally it also works on CPU but will be slow.
+model:
+  arch: Unet
+  encoder: resnet34
+  encoder_weights: imagenet
+  in_channels: 3
+  num_classes: 5
+
+data:
+  root: data/datasets/oil_spill
+  image_size: 256
+  batch_size: 8
+  num_workers: 4
+  val_split: 0.2
+  split_seed: 42
+
+optim:
+  lr: 0.0003
+  weight_decay: 0.0001
+  epochs: 50
+  optimizer: adamw
+  scheduler: cosine
+
+loss:
+  type: dice_focal
+  # "auto" computes inverse-frequency class weights from the training masks,
+  # up-weighting the rare oil-spill class. Applies to the CE term only.
+  class_weights: auto
+  focal_gamma: 2.0
+  dice_focal_weights: [0.5, 0.5]
+
+runtime:
+  seed: 42
+  amp: true
+  device: auto
+  precision: fp16
+  deterministic: true
+
+early_stopping:
+  enabled: true
+  monitor: val_oil_iou
+  mode: max
+  patience: 10
+  min_delta: 0.0
+
+checkpoint:
+  dir: artifacts/checkpoints
+  save_best: true
+  save_last: true
+  monitor: val_oil_iou
+  mode: max
+
+mlflow:
+  experiment_name: oil-spill-segmentation
+  tracking_uri: ./mlruns
+  log_samples: 4
