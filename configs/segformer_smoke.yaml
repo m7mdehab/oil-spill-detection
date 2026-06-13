@@ -1,0 +1,61 @@
+# Fast CPU sanity-check config for SegFormer.
+#
+# Uses the smallest MiT-b0 checkpoint (~14 MB) for a quick download, small images
+# and tiny batches. Pair with `--smoke` on the CLI to cap epochs at 2 and subset
+# the data to ~10%. Intended only to prove the pipeline runs end to end and
+# writes a checkpoint + MLflow run. (encoder_weights is irrelevant here: the HF
+# builder selects base weights via params.hf_model, not encoder_weights.)
+model:
+  arch: segformer
+  encoder: mit-b0
+  encoder_weights: null
+  in_channels: 3
+  num_classes: 5
+  params:
+    hf_model: nvidia/mit-b0
+
+data:
+  root: data/datasets/oil_spill
+  image_size: 256
+  batch_size: 2
+  num_workers: 0
+  val_split: 0.2
+  split_seed: 42
+
+optim:
+  lr: 0.00006
+  weight_decay: 0.01
+  epochs: 2
+  optimizer: adamw
+  scheduler: none
+
+loss:
+  type: dice_focal
+  class_weights: null
+  focal_gamma: 2.0
+  dice_focal_weights: [0.5, 0.5]
+
+runtime:
+  seed: 42
+  amp: false
+  device: cpu
+  precision: fp16
+  deterministic: true
+
+early_stopping:
+  enabled: false
+  monitor: val_oil_iou
+  mode: max
+  patience: 10
+
+checkpoint:
+  dir: artifacts/checkpoints
+  save_best: true
+  save_last: true
+  monitor: val_oil_iou
+  mode: max
+
+mlflow:
+  experiment_name: oil-spill-smoke
+  tracking_uri: ./mlruns
+  log_samples: 2

@@ -1,0 +1,66 @@
+# Full SegFormer training configuration.
+#
+# Hugging Face SegFormer (MiT-b2 encoder) with ImageNet-pretrained weights, Dice+
+# Focal loss, cosine LR schedule, and early stopping on the oil-spill IoU (the
+# headline metric). SegFormer benefits from larger inputs, so we train at 512;
+# drop data.image_size to 256 if GPU memory is tight. Run this on GPU.
+model:
+  arch: segformer
+  encoder: mit-b2
+  encoder_weights: imagenet
+  in_channels: 3
+  num_classes: 5
+  # Builder-specific options. ``hf_model`` selects the Hugging Face checkpoint.
+  params:
+    hf_model: nvidia/mit-b2
+
+data:
+  root: data/datasets/oil_spill
+  # Multiple of 32 (SegFormer downsamples by 32). 256 is a lighter alternative.
+  image_size: 512
+  batch_size: 8
+  num_workers: 4
+  val_split: 0.2
+  split_seed: 42
+
+optim:
+  # 6e-5 is a typical SegFormer fine-tuning learning rate.
+  lr: 0.00006
+  weight_decay: 0.01
+  epochs: 50
+  optimizer: adamw
+  scheduler: cosine
+
+loss:
+  type: dice_focal
+  # "auto" computes inverse-frequency class weights from the training masks,
+  # up-weighting the rare oil-spill class. Applies to the CE term only.
+  class_weights: auto
+  focal_gamma: 2.0
+  dice_focal_weights: [0.5, 0.5]
+
+runtime:
+  seed: 42
+  amp: true
+  device: auto
+  precision: bf16
+  deterministic: true
+
+early_stopping:
+  enabled: true
+  monitor: val_oil_iou
+  mode: max
+  patience: 10
+  min_delta: 0.0
+
+checkpoint:
+  dir: artifacts/checkpoints
+  save_best: true
+  save_last: true
+  monitor: val_oil_iou
+  mode: max
+
+mlflow:
+  experiment_name: oil-spill-segmentation
+  tracking_uri: ./mlruns
+  log_samples: 4

@@ -1,0 +1,58 @@
+# Full DeepLabV3+ training configuration.
+#
+# A distinct CNN family from the U-Net baseline: ResNet-50 backbone with atrous
+# spatial pyramid pooling (ASPP) and an encoder-decoder head. Built directly by
+# segmentation_models_pytorch (arch: DeepLabV3Plus). Run on GPU.
+model:
+  arch: DeepLabV3Plus
+  encoder: resnet50
+  encoder_weights: imagenet
+  in_channels: 3
+  num_classes: 5
+
+data:
+  root: data/datasets/oil_spill
+  image_size: 256
+  batch_size: 8
+  num_workers: 4
+  val_split: 0.2
+  split_seed: 42
+
+optim:
+  lr: 0.0003
+  weight_decay: 0.0001
+  epochs: 50
+  optimizer: adamw
+  scheduler: cosine
+
+loss:
+  type: dice_focal
+  class_weights: auto
+  focal_gamma: 2.0
+  dice_focal_weights: [0.5, 0.5]
+
+runtime:
+  seed: 42
+  amp: true
+  device: auto
+  precision: bf16
+  deterministic: true
+
+early_stopping:
+  enabled: true
+  monitor: val_oil_iou
+  mode: max
+  patience: 10
+  min_delta: 0.0
+
+checkpoint:
+  dir: artifacts/checkpoints
+  save_best: true
+  save_last: true
+  monitor: val_oil_iou
+  mode: max
+
+mlflow:
+  experiment_name: oil-spill-segmentation
+  tracking_uri: ./mlruns
+  log_samples: 4
