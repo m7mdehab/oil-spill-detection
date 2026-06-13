@@ -1,1 +1,44 @@
+# --- project management (local only) ---
+_pm/
+
+# --- secrets ---
+.env
+.env.*
+!.env.example
+
+# --- python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+.python-version
+.ruff_cache/
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+.pyright/
+
+# --- data & artifacts (tracked: README, checksums, small samples) ---
+data/*
+!data/README.md
+!data/checksums.sha256
+!data/samples/
+artifacts/
+mlruns/
+outputs/
+
+# --- frontend ---
+node_modules/
+web/dist/
+
+# --- editors/os ---
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
 .streamlit/
