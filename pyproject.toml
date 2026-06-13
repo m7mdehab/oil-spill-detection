@@ -58,6 +58,11 @@ dev = [
     "pytest-cov",
     "pre-commit",
 ]
+# Infra for launching GPU training on Modal. Not installed by CI (which is
+# CPU-only and never trains); install locally with `uv sync --group gpu`.
+gpu = [
+    "modal",
+]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/oilspill"]
