@@ -43,6 +43,7 @@ image = (
         "torch==2.9.0",
         "torchvision",
         "segmentation-models-pytorch",
+        "transformers",
         "torchmetrics",
         "albumentations",
         "mlflow",

@@ -19,7 +19,6 @@ from pathlib import Path
 
 import mlflow
 import numpy as np
-import segmentation_models_pytorch as smp
 import torch
 from torch import nn
 from torch.amp.grad_scaler import GradScaler
@@ -32,6 +31,7 @@ from oilspill.metrics import (
     SegmentationMetrics,
     logits_to_labels,
 )
+from oilspill.models import build_model as registry_build_model
 from oilspill.training.config import TrainConfig
 from oilspill.training.datasets import (
     SyntheticSegmentationDataset,
@@ -67,16 +67,8 @@ def resolve_device(requested: str) -> torch.device:
 
 
 def build_model(cfg: TrainConfig) -> nn.Module:
-    """Instantiate the segmentation model from config via ``smp``."""
-    factory = getattr(smp, cfg.model.arch, None)
-    if factory is None:
-        raise ValueError(f"unknown smp architecture: {cfg.model.arch!r}")
-    return factory(
-        encoder_name=cfg.model.encoder,
-        encoder_weights=cfg.model.encoder_weights,
-        in_channels=cfg.model.in_channels,
-        classes=cfg.model.num_classes,
-    )
+    """Instantiate the segmentation model from config via the model registry."""
+    return registry_build_model(cfg.model, pretrained=True)
 
 
 def build_optimizer(cfg: TrainConfig, params: object) -> torch.optim.Optimizer:

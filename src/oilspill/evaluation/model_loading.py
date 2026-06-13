@@ -22,33 +22,26 @@ from typing import Any
 
 import numpy as np
 import onnxruntime as ort
-import segmentation_models_pytorch as smp
 import torch
 from torch import nn
+
+from oilspill.models import build_model as registry_build_model
+from oilspill.training.config import ModelConfig
 
 # A model is either a torch module or an ONNX inference session.
 ModelOrSession = nn.Module | ort.InferenceSession
 
 
 def build_model_from_config(config: dict[str, Any]) -> nn.Module:
-    """Instantiate an ``smp`` model from a checkpoint's ``config["model"]`` block.
+    """Instantiate the model from a checkpoint's ``config["model"]`` block.
 
-    Mirrors :func:`oilspill.training.trainer.build_model` but always passes
-    ``encoder_weights=None``: at evaluation time the trained weights replace any
-    pretrained stem, so downloading ImageNet weights would be wasteful and could
-    fail offline.
+    Routes through :func:`oilspill.models.build_model` with ``pretrained=False``
+    so any registered or smp architecture is reconstructed identically to
+    training; the trained checkpoint weights are loaded afterwards, so base/
+    ImageNet weights are not downloaded here.
     """
-    model_cfg = config["model"]
-    arch = model_cfg["arch"]
-    factory = getattr(smp, arch, None)
-    if factory is None:
-        raise ValueError(f"unknown smp architecture: {arch!r}")
-    return factory(
-        encoder_name=model_cfg["encoder"],
-        encoder_weights=None,
-        in_channels=model_cfg["in_channels"],
-        classes=model_cfg["num_classes"],
-    )
+    model_cfg = ModelConfig.model_validate(config["model"])
+    return registry_build_model(model_cfg, pretrained=False)
 
 
 def load_model_from_checkpoint(

@@ -20,7 +20,13 @@ LossType = Literal["ce", "dice", "focal", "dice_focal"]
 
 
 class ModelConfig(BaseModel):
-    """Segmentation model architecture (passed through to ``smp``)."""
+    """Segmentation model architecture.
+
+    ``arch`` selects the builder: a name registered in :mod:`oilspill.models`
+    (e.g. ``segformer``) wins; otherwise it is treated as a
+    ``segmentation_models_pytorch`` architecture (e.g. ``Unet``, ``DeepLabV3Plus``).
+    ``params`` carries builder-specific options (e.g. a Hugging Face model id).
+    """
 
     model_config = ConfigDict(extra="forbid")
 
@@ -31,6 +37,8 @@ class ModelConfig(BaseModel):
     encoder_weights: str | None = "imagenet"
     in_channels: int = 3
     num_classes: int = NUM_CLASSES
+    # Builder-specific keyword arguments (e.g. {"hf_model": "nvidia/mit-b2"}).
+    params: dict[str, Any] = Field(default_factory=dict)
 
 
 class DataConfig(BaseModel):
