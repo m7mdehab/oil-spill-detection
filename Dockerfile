@@ -26,7 +26,9 @@ WORKDIR /app
 # Install dependencies first (better layer caching). torch resolves to the CPU
 # wheel index pinned in pyproject; rasterio/geopandas/onnxruntime ship manylinux
 # wheels that bundle their native libs, so no system GDAL is required.
-COPY pyproject.toml uv.lock README.md ./
+# LICENSE is required: pyproject sets license = { file = "LICENSE" }, which
+# hatchling validates while building the project during uv sync.
+COPY pyproject.toml uv.lock README.md LICENSE ./
 COPY src/ ./src/
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen --no-dev
