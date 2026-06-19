@@ -43,4 +43,5 @@ jobs:
 
       - name: Report image size
         if: always()
-        run: docker image inspect oilspill-app --format 'image size: {{.Size}} bytes' || true
+        run: |
+          docker image inspect oilspill-app --format 'image size {{.Size}} bytes' || true
