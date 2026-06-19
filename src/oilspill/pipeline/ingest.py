@@ -141,11 +141,11 @@ def _build_filter(
     """Assemble the OData ``$filter`` expression for a Sentinel-1 GRD search."""
     wkt = _polygon_wkt(aoi_geojson)
     intersects = f"OData.CSC.Intersects(area=geography'SRID=4326;{wkt}')"
-    product_type_filter = (
-        "Attributes/OData.CSC.StringAttribute/any("
-        "att:att/Name eq 'productType' and "
-        f"att/OData.CSC.StringAttribute/Value eq '{product_type}')"
-    )
+    # Filter the product type via the product Name, which encodes it in the
+    # standard Sentinel naming convention (e.g. ``S1B_IW_GRDH_1SDV_...``). This is
+    # more robust than the ``Attributes/productType`` lambda filter, which silently
+    # matches nothing unless the attribute value is exact and expanded server-side.
+    product_type_filter = f"contains(Name,'{product_type}')"
     return (
         f"Collection/Name eq '{SENTINEL1_COLLECTION}'"
         f" and {intersects}"
