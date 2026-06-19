@@ -29,8 +29,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Build image
-        run: docker build -t oilspill-app .
+      - name: Disk free before
+        run: df -h /
+
+      - name: Build web stage
+        run: docker build --target web -t oilspill-web .
+
+      - name: Build runtime stage
+        run: docker build --target runtime -t oilspill-app .
+
+      - name: Disk free after
+        run: df -h /
 
       - name: Start container and check health
         run: |
