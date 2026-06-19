@@ -1,0 +1,9 @@
+{
+  "scene": "S1B_IW_GRDH_1SDV_20200810T013755_20200810T013820_022854_02B625_672D.SAFE",
+  "acquired": "2020-08-10",
+  "aoi_bbox": [57.58, -20.52, 57.85, -20.32],
+  "model": "segformer-mit-b2",
+  "num_oil_polygons": 28,
+  "total_oil_area_km2": 6.915424264380775,
+  "note": "Detected oil over the Pointe d'Esny AOI. Uncalibrated-DN preprocessing fallback; see README.md for method and limitations."
+}
