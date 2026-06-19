@@ -23,6 +23,13 @@ ENV UV_COMPILE_BYTECODE=1 \
 
 WORKDIR /app
 
+# A C compiler is needed at install time: a few transitive deps (e.g. stringzilla
+# via albumentations/albucore) have no prebuilt wheel for this platform and build
+# from source.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends gcc \
+    && rm -rf /var/lib/apt/lists/*
+
 # Install dependencies first (better layer caching). torch resolves to the CPU
 # wheel index pinned in pyproject; rasterio/geopandas/onnxruntime ship manylinux
 # wheels that bundle their native libs, so no system GDAL is required.
