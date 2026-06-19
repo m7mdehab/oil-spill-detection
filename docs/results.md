@@ -22,6 +22,7 @@ python scripts/evaluate.py --checkpoint artifacts/checkpoints/<run>/best.pt --ta
 | Run | Tag | Oil IoU | Oil recall | Mean IoU | Macro F1 | Pixel acc. | Images | Date | Metrics JSON |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | run-20260613-101720 | smoke | 0.0014 | 0.0014 | 0.2731 | 0.3470 | 0.8609 | 30 | 2026-06-13 | `docs/results/run-20260613-101720.json` |
+| segformer-mit-b2 | segformer-mit-b2 | 0.5662 | 0.7644 | 0.6964 | 0.8017 | 0.9668 | 110 | 2026-06-19 | `docs/results/segformer-mit-b2.json` |
 | unet-r34-baseline | unet-baseline | 0.5419 | 0.6853 | 0.6353 | 0.7467 | 0.9533 | 110 | 2026-06-13 | `docs/results/unet-r34-baseline.json` |
 
 <!-- RESULTS_TABLE_END -->
@@ -40,6 +41,17 @@ python scripts/evaluate.py --checkpoint artifacts/checkpoints/<run>/best.pt --ta
 | Ship | 0.0000 | 0.0000 | 0.0000 | 0.0000 |
 | Land | 0.2514 | 0.2648 | 0.8324 | 0.4017 |
 
+#### segformer-mit-b2 (segformer-mit-b2)
+
+| Class | IoU | Precision | Recall | F1 |
+| --- | --- | --- | --- | --- |
+| Sea Surface | 0.9657 | 0.9821 | 0.9830 | 0.9825 |
+| Oil Spill | 0.5662 | 0.6859 | 0.7644 | 0.7231 |
+| Look-alike | 0.5814 | 0.7606 | 0.7116 | 0.7353 |
+| Ship | 0.4246 | 0.5393 | 0.6664 | 0.5961 |
+| Land | 0.9442 | 0.9529 | 0.9903 | 0.9713 |
+
+
 #### unet-r34-baseline (unet-baseline)
 
 | Class | IoU | Precision | Recall | F1 |
@@ -49,6 +61,5 @@ python scripts/evaluate.py --checkpoint artifacts/checkpoints/<run>/best.pt --ta
 | Look-alike | 0.4623 | 0.6168 | 0.6486 | 0.6323 |
 | Ship | 0.3046 | 0.3588 | 0.6686 | 0.4670 |
 | Land | 0.9166 | 0.9255 | 0.9896 | 0.9565 |
-
 
 <!-- RESULTS_DETAIL_END -->
