@@ -26,8 +26,6 @@ jobs:
 
   docker:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     steps:
       - uses: actions/checkout@v4
 
@@ -36,33 +34,19 @@ jobs:
           sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/lib/android \
             /opt/hostedtoolcache/CodeQL /usr/local/share/boost "$AGENT_TOOLSDIRECTORY" || true
           sudo docker image prune -af || true
-          df -h /
 
-      - name: Build runtime stage (capture log)
-        id: build
-        continue-on-error: true
-        run: |
-          set -o pipefail
-          docker build --target runtime -t oilspill-app . 2>&1 | tee /tmp/build.log
-
-      - name: Publish build log to ci-debug branch
-        if: always()
-        run: |
-          tail -150 /tmp/build.log > build-error.log
-          git config user.email "ci@local"; git config user.name "ci"
-          git add -f build-error.log
-          git commit -m "ci debug build log [skip ci]" || true
-          git push -f origin HEAD:ci-debug
-
-      - name: Fail if build failed
-        if: steps.build.outcome != 'success'
-        run: echo "runtime build failed; see ci-debug branch" && exit 1
+      - name: Build image
+        run: docker build -t oilspill-app .
 
       - name: Start container and check health
         run: |
           docker run -d --name oilspill -p 7860:7860 oilspill-app
           for i in $(seq 1 30); do
-            if curl -fsS http://localhost:7860/healthz; then echo "healthy"; exit 0; fi
+            if curl -fsS http://localhost:7860/healthz; then echo "healthy"; break; fi
             sleep 5
           done
-          echo "container did not become healthy"; docker logs oilspill; exit 1
+          curl -fsS http://localhost:7860/healthz || { echo "not healthy"; docker logs oilspill; exit 1; }
+
+      - name: Report image size
+        if: always()
+        run: docker image ls oilspill-app
