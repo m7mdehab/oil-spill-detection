@@ -21,6 +21,7 @@ python scripts/evaluate.py --checkpoint artifacts/checkpoints/<run>/best.pt --ta
 
 | Run | Tag | Oil IoU | Oil recall | Mean IoU | Macro F1 | Pixel acc. | Images | Date | Metrics JSON |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| deeplabv3plus-r50 | deeplabv3plus-r50 | 0.4806 | 0.6512 | 0.5811 | 0.6951 | 0.9292 | 110 | 2026-06-19 | `docs/results/deeplabv3plus-r50.json` |
 | run-20260613-101720 | smoke | 0.0014 | 0.0014 | 0.2731 | 0.3470 | 0.8609 | 30 | 2026-06-13 | `docs/results/run-20260613-101720.json` |
 | segformer-mit-b2 | segformer-mit-b2 | 0.5662 | 0.7644 | 0.6964 | 0.8017 | 0.9668 | 110 | 2026-06-19 | `docs/results/segformer-mit-b2.json` |
 | unet-r34-baseline | unet-baseline | 0.5419 | 0.6853 | 0.6353 | 0.7467 | 0.9533 | 110 | 2026-06-13 | `docs/results/unet-r34-baseline.json` |
@@ -30,6 +31,17 @@ python scripts/evaluate.py --checkpoint artifacts/checkpoints/<run>/best.pt --ta
 ## Per-class metrics
 
 <!-- RESULTS_DETAIL_BEGIN -->
+
+#### deeplabv3plus-r50 (deeplabv3plus-r50)
+
+| Class | IoU | Precision | Recall | F1 |
+| --- | --- | --- | --- | --- |
+| Sea Surface | 0.9257 | 0.9812 | 0.9423 | 0.9614 |
+| Oil Spill | 0.4806 | 0.6472 | 0.6512 | 0.6492 |
+| Look-alike | 0.3783 | 0.4426 | 0.7227 | 0.5490 |
+| Ship | 0.2293 | 0.2918 | 0.5170 | 0.3731 |
+| Land | 0.8916 | 0.9037 | 0.9852 | 0.9427 |
+
 
 #### run-20260613-101720 (smoke)
 
@@ -50,7 +62,6 @@ python scripts/evaluate.py --checkpoint artifacts/checkpoints/<run>/best.pt --ta
 | Look-alike | 0.5814 | 0.7606 | 0.7116 | 0.7353 |
 | Ship | 0.4246 | 0.5393 | 0.6664 | 0.5961 |
 | Land | 0.9442 | 0.9529 | 0.9903 | 0.9713 |
-
 
 #### unet-r34-baseline (unet-baseline)
 

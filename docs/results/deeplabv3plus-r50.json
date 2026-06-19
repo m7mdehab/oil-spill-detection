@@ -1,0 +1,100 @@
+{
+  "meta": {
+    "run_name": "deeplabv3plus-r50",
+    "tag": "deeplabv3plus-r50",
+    "source": "artifacts/checkpoints/run-20260619-092912/best.pt",
+    "source_type": "checkpoint",
+    "split": "test",
+    "image_size": [
+      256,
+      256
+    ],
+    "num_images": 110,
+    "device": "cpu"
+  },
+  "metrics": {
+    "class_names": [
+      "Sea Surface",
+      "Oil Spill",
+      "Look-alike",
+      "Ship",
+      "Land"
+    ],
+    "confusion_matrix": [
+      [
+        6149312,
+        19438,
+        333521,
+        636,
+        22622
+      ],
+      [
+        20310,
+        50150,
+        6524,
+        23,
+        0
+      ],
+      [
+        93986,
+        7884,
+        270064,
+        47,
+        1711
+      ],
+      [
+        382,
+        19,
+        13,
+        457,
+        13
+      ],
+      [
+        2948,
+        0,
+        76,
+        403,
+        228421
+      ]
+    ],
+    "per_class": {
+      "iou": {
+        "Sea Surface": 0.9256613762587205,
+        "Oil Spill": 0.4806033656610572,
+        "Look-alike": 0.37833309518005787,
+        "Ship": 0.2293025589563472,
+        "Land": 0.8915938702701859
+      },
+      "precision": {
+        "Sea Surface": 0.9812307062875043,
+        "Oil Spill": 0.6471719296434425,
+        "Look-alike": 0.4425842103710599,
+        "Ship": 0.29182630906768836,
+        "Land": 0.9036820471026676
+      },
+      "recall": {
+        "Sea Surface": 0.9423468963205894,
+        "Oil Spill": 0.6512394977080006,
+        "Look-alike": 0.7226914143198142,
+        "Ship": 0.5169683257918553,
+        "Land": 0.9852187640178047
+      },
+      "f1": {
+        "Sea Surface": 0.961395796448019,
+        "Oil Spill": 0.6491993423863092,
+        "Look-alike": 0.5489719379198894,
+        "Ship": 0.3730612244897959,
+        "Land": 0.9426905894369757
+      }
+    },
+    "aggregate": {
+      "mean_iou": 0.5810988532652737,
+      "macro_precision": 0.6532990404944725,
+      "macro_recall": 0.7636929796316128,
+      "macro_f1": 0.6950637781361977,
+      "pixel_accuracy": 0.9291775790127841,
+      "oil_iou": 0.4806033656610572,
+      "oil_recall": 0.6512394977080006
+    }
+  }
+}
