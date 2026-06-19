@@ -1,0 +1,71 @@
+# Full fine-tuning configuration for the EO foundation model.
+#
+# DINOv2 ViT backbone (facebook/dinov2-base) with a conv decode head, fine-tuned
+# end to end for SAR oil-spill segmentation. DINOv2 uses a patch size of 14, so
+# image_size must be a multiple of 14: 448 (= 32 * 14) is used here for a dense
+# 32x32 token grid. Dice+Focal loss, cosine LR schedule, early stopping on the
+# oil-spill IoU (the headline metric), bf16 precision. Run this on GPU.
+model:
+  arch: foundation
+  # encoder/encoder_weights are unused by this builder (it selects the backbone
+  # via params.backbone); kept for ModelConfig schema compatibility.
+  encoder: dinov2
+  encoder_weights: null
+  in_channels: 3
+  num_classes: 5
+  params:
+    backbone: facebook/dinov2-base
+    # Fine-tune the whole backbone (set true to linear-probe the head only).
+    freeze_backbone: false
+    head_hidden: 256
+
+data:
+  root: data/datasets/oil_spill
+  # Multiple of 14 (DINOv2 patch size): 448 = 32 * 14.
+  image_size: 448
+  batch_size: 4
+  num_workers: 4
+  val_split: 0.2
+  split_seed: 42
+
+optim:
+  # Moderate LR for end-to-end fine-tuning of a pretrained ViT plus a fresh head.
+  lr: 0.0001
+  weight_decay: 0.01
+  epochs: 50
+  optimizer: adamw
+  scheduler: cosine
+
+loss:
+  type: dice_focal
+  # "auto" computes inverse-frequency class weights from the training masks,
+  # up-weighting the rare oil-spill class. Applies to the CE term only.
+  class_weights: auto
+  focal_gamma: 2.0
+  dice_focal_weights: [0.5, 0.5]
+
+runtime:
+  seed: 42
+  amp: true
+  device: auto
+  precision: bf16
+  deterministic: true
+
+early_stopping:
+  enabled: true
+  monitor: val_oil_iou
+  mode: max
+  patience: 10
+  min_delta: 0.0
+
+checkpoint:
+  dir: artifacts/checkpoints
+  save_best: true
+  save_last: true
+  monitor: val_oil_iou
+  mode: max
+
+mlflow:
+  experiment_name: oil-spill-segmentation
+  tracking_uri: ./mlruns
+  log_samples: 4
