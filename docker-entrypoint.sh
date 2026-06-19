@@ -11,7 +11,7 @@ mkdir -p "$ONNX_DIR"
 
 if [ -n "${OILSPILL_MODEL_HF_REPO:-}" ] && [ ! -f "$ONNX_DIR/$MODEL_FILE" ]; then
   echo "fetching $MODEL_FILE from HF repo $OILSPILL_MODEL_HF_REPO ..."
-  uv run python - <<'PY' || echo "model fetch failed; the API will serve without a model"
+  python - <<'PY' || echo "model fetch failed; the API will serve without a model"
 import os
 from huggingface_hub import hf_hub_download
 repo = os.environ["OILSPILL_MODEL_HF_REPO"]

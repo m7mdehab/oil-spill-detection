@@ -45,6 +45,7 @@ dependencies = [
     "requests",
     "tqdm",
     "python-dotenv",
+    "huggingface-hub",
 ]
 
 [dependency-groups]

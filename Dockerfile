@@ -47,7 +47,11 @@ COPY --from=web /web/dist ./web/dist
 # Face Hub, not in git). The entrypoint fetches it at startup when
 # OILSPILL_MODEL_HF_REPO is set; without it the API still serves and returns a
 # clear 503 from /predict until a model is available.
-ENV OILSPILL_API_ONNX_DIR=/app/artifacts/exports \
+# Put the synced virtualenv on PATH and use it directly. We invoke the venv's
+# python rather than `uv run` so the container never tries to re-sync (which would
+# pull the dev/ml groups) at startup.
+ENV PATH="/app/.venv/bin:$PATH" \
+    OILSPILL_API_ONNX_DIR=/app/artifacts/exports \
     OILSPILL_API_WEB_DIST=/app/web/dist
 RUN mkdir -p /app/artifacts/exports
 
@@ -58,4 +62,4 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=40s --retries=3 \
 COPY docker-entrypoint.sh /app/docker-entrypoint.sh
 RUN chmod +x /app/docker-entrypoint.sh
 ENTRYPOINT ["/app/docker-entrypoint.sh"]
-CMD ["uv", "run", "python", "scripts/serve.py"]
+CMD ["python", "scripts/serve.py"]
