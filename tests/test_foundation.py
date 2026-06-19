@@ -27,6 +27,21 @@ def _small_cfg(num_classes: int = 5, **params: object) -> ModelConfig:
     )
 
 
+def test_offline_pos_embeddings_match_pretrained_size() -> None:
+    """Offline build must size position embeddings to DINOv2's native 518px grid
+    (1370 tokens), so a checkpoint trained from the pretrained backbone loads.
+
+    Guards a regression where the offline config used the default 224px image size
+    (257 tokens), making trained checkpoints fail to load for evaluation.
+    """
+    model = build_model(_small_cfg(), pretrained=False)
+    pos = dict(model.named_parameters())["backbone.embeddings.position_embeddings"]
+    assert tuple(pos.shape) == (1, 1370, 384)
+    # Two independent offline builds round-trip strictly (architecture is stable).
+    other = build_model(_small_cfg(), pretrained=False)
+    other.load_state_dict(model.state_dict(), strict=True)
+
+
 def test_foundation_is_registered() -> None:
     assert "foundation" in registered_architectures()
 

@@ -75,6 +75,12 @@ _DINOV2_VARIANTS: dict[str, dict[str, int]] = {
 
 # DINOv2 patch size (all published variants use 14).
 _PATCH_SIZE = 14
+# Native image size of the published DINOv2 checkpoints. The stored position
+# embeddings are sized for this resolution (518/14 = 37 -> 37*37 + 1 = 1370 tokens);
+# DINOv2 interpolates them to the actual input size at runtime. The offline config
+# MUST use the same value so a checkpoint trained from the pretrained backbone
+# (which keeps the 1370-token embedding) loads cleanly for evaluation.
+_NATIVE_IMAGE_SIZE = 518
 
 
 def _offline_config(backbone: str) -> Dinov2Config:
@@ -94,6 +100,7 @@ def _offline_config(backbone: str) -> Dinov2Config:
         num_hidden_layers=spec["num_hidden_layers"],
         num_attention_heads=spec["num_attention_heads"],
         patch_size=_PATCH_SIZE,
+        image_size=_NATIVE_IMAGE_SIZE,
     )
 
 
