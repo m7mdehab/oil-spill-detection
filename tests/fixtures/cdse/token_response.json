@@ -1,0 +1,10 @@
+{
+  "access_token": "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIn0.FAKE.TOKEN_FOR_TESTS",
+  "expires_in": 600,
+  "refresh_expires_in": 3600,
+  "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCIgOiAiSldUIn0.FAKE.REFRESH",
+  "token_type": "Bearer",
+  "not-before-policy": 0,
+  "session_state": "00000000-0000-0000-0000-000000000000",
+  "scope": "AUDIENCE_PUBLIC openid"
+}

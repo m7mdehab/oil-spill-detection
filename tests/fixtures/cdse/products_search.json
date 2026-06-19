@@ -1,0 +1,77 @@
+{
+  "@odata.context": "$metadata#Products",
+  "value": [
+    {
+      "@odata.mediaContentType": "application/octet-stream",
+      "Id": "b1e2c3d4-1111-2222-3333-444455556666",
+      "Name": "S1A_IW_GRDH_1SDV_20220520T173305_20220520T173330_043240_0529A1_ABCD.SAFE",
+      "ContentType": "application/octet-stream",
+      "ContentLength": 1073741824,
+      "OriginDate": "2022-05-20T18:01:11.000Z",
+      "PublicationDate": "2022-05-20T18:30:42.000Z",
+      "ModificationDate": "2022-05-20T18:30:42.000Z",
+      "Online": true,
+      "S3Path": "/eodata/Sentinel-1/SAR/IW_GRDH_1S/2022/05/20/S1A_IW_GRDH_1SDV_20220520T173305_20220520T173330_043240_0529A1_ABCD.SAFE",
+      "Checksum": [
+        {
+          "Value": "0123456789abcdef0123456789abcdef",
+          "Algorithm": "MD5",
+          "ChecksumDate": "2022-05-20T18:30:42.000Z"
+        }
+      ],
+      "ContentDate": {
+        "Start": "2022-05-20T17:33:05.123Z",
+        "End": "2022-05-20T17:33:30.456Z"
+      },
+      "Footprint": "geography'SRID=4326;POLYGON ((12.1 41.8, 14.3 41.9, 14.2 43.4, 12.0 43.3, 12.1 41.8))'",
+      "GeoFootprint": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [12.1, 41.8],
+            [14.3, 41.9],
+            [14.2, 43.4],
+            [12.0, 43.3],
+            [12.1, 41.8]
+          ]
+        ]
+      }
+    },
+    {
+      "@odata.mediaContentType": "application/octet-stream",
+      "Id": "a9f8e7d6-aaaa-bbbb-cccc-ddddeeeeffff",
+      "Name": "S1A_IW_GRDH_1SDV_20220519T173240_20220519T173305_043217_05291F_1234.SAFE",
+      "ContentType": "application/octet-stream",
+      "ContentLength": 1006632960,
+      "OriginDate": "2022-05-19T18:00:05.000Z",
+      "PublicationDate": "2022-05-19T18:28:10.000Z",
+      "ModificationDate": "2022-05-19T18:28:10.000Z",
+      "Online": true,
+      "S3Path": "/eodata/Sentinel-1/SAR/IW_GRDH_1S/2022/05/19/S1A_IW_GRDH_1SDV_20220519T173240_20220519T173305_043217_05291F_1234.SAFE",
+      "Checksum": [
+        {
+          "Value": "fedcba9876543210fedcba9876543210",
+          "Algorithm": "MD5",
+          "ChecksumDate": "2022-05-19T18:28:10.000Z"
+        }
+      ],
+      "ContentDate": {
+        "Start": "2022-05-19T17:32:40.000Z",
+        "End": "2022-05-19T17:33:05.000Z"
+      },
+      "Footprint": "geography'SRID=4326;POLYGON ((12.2 41.7, 14.4 41.8, 14.3 43.3, 12.1 43.2, 12.2 41.7))'",
+      "GeoFootprint": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [12.2, 41.7],
+            [14.4, 41.8],
+            [14.3, 43.3],
+            [12.1, 43.2],
+            [12.2, 41.7]
+          ]
+        ]
+      }
+    }
+  ]
+}
