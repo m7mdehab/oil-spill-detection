@@ -1,0 +1,1 @@
+{"root":["./src/app.tsx","./src/main.tsx","./src/vite-env.d.ts","./src/components/legend.tsx","./src/lib/api.ts","./src/lib/classes.ts","./src/lib/geojson.ts","./src/lib/types.ts","./src/views/models.tsx","./src/views/quickdetect.tsx","./src/views/scenemonitor.tsx"],"version":"5.9.3"}
