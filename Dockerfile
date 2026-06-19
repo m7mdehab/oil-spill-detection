@@ -27,7 +27,7 @@ WORKDIR /app
 # via albumentations/albucore) have no prebuilt wheel for this platform and build
 # from source.
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends gcc \
+    && apt-get install -y --no-install-recommends build-essential \
     && rm -rf /var/lib/apt/lists/*
 
 # Install dependencies first (better layer caching). torch resolves to the CPU
