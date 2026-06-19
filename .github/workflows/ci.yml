@@ -29,17 +29,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Disk free before
-        run: df -h /
+      - name: Free up disk space
+        run: |
+          df -h /
+          sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/lib/android \
+            /opt/hostedtoolcache/CodeQL /usr/local/share/boost "$AGENT_TOOLSDIRECTORY" || true
+          sudo docker image prune -af || true
+          df -h /
 
       - name: Build web stage
         run: docker build --target web -t oilspill-web .
 
       - name: Build runtime stage
         run: docker build --target runtime -t oilspill-app .
-
-      - name: Disk free after
-        run: df -h /
 
       - name: Start container and check health
         run: |
