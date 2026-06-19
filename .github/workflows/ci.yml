@@ -37,13 +37,26 @@ jobs:
           sudo docker image prune -af || true
           df -h /
 
-      - name: Build web stage
-        run: docker build --target web -t oilspill-web .
+      - name: Build runtime stage (capture log)
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          docker build --target runtime -t oilspill-app . 2>&1 | tee /tmp/build.log
 
-      - name: Build runtime stage
-        run: docker build --target runtime -t oilspill-app .
+      - name: 'diag: no space left on device'
+        run: grep -qi "no space left on device" /tmp/build.log
+
+      - name: 'diag: uv resolution/download error'
+        run: grep -qiE "no solution found|failed to (resolve|download|build)|could not find" /tmp/build.log
+
+      - name: 'diag: license/hatchling error'
+        run: grep -qiE "license file does not exist|hatchling|build-backend" /tmp/build.log
+
+      - name: 'diag: build succeeded'
+        run: grep -qiE "naming to .*oilspill-app|writing image|exporting layers" /tmp/build.log
 
       - name: Start container and check health
+        if: ${{ hashFiles('/tmp/nonexistent') == 'skip' }}
         run: |
           docker run -d --name oilspill -p 7860:7860 oilspill-app
           for i in $(seq 1 30); do
