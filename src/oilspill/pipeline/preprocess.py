@@ -305,9 +305,15 @@ def calibrate_safe(
         raise FileNotFoundError(f"SAFE product not found: {safe}")
 
     pol = polarisation.upper()
+    # xarray-sentinel groups a SAFE as ``<mode>/<pol>`` (e.g. ``IW/VV``), not just
+    # ``<pol>``. The acquisition mode is the second token of the product name
+    # (``S1B_IW_GRDH_...`` -> ``IW``); fall back to scanning the root dataset's
+    # subgroups if the name does not carry it.
+    mode = _acquisition_mode(safe, xs)
+    group = f"{mode}/{pol}"
 
-    measurement = xs.open_sentinel1_dataset(str(safe), group=pol)
-    calibration = xs.open_sentinel1_dataset(str(safe), group=f"{pol}/calibration")
+    measurement = xs.open_sentinel1_dataset(str(safe), group=group)
+    calibration = xs.open_sentinel1_dataset(str(safe), group=f"{group}/calibration")
 
     dn = measurement["measurement"]
     sigma0_da: xr.DataArray = xs.calibrate_intensity(dn, calibration["sigmaNought"])
@@ -315,6 +321,107 @@ def calibrate_safe(
     transform, crs = _georef_from_dataarray(sigma0_da)
     sigma0 = np.asarray(sigma0_da.values, dtype=np.float64)
     return CalibratedScene(sigma0=sigma0, transform=transform, crs=crs)
+
+
+def read_grd_measurement(
+    safe_path: Path | str,
+    polarisation: str = "vv",
+    *,
+    bbox: tuple[float, float, float, float] | None = None,
+) -> CalibratedScene:
+    """Read a GRD measurement GeoTIFF as relative intensity with GCP georeferencing.
+
+    A robust fallback for when full sigma0 calibration via xarray-sentinel is
+    unavailable for a given product. It reads the measurement GeoTIFF directly with
+    rasterio and derives an affine transform from the product's ground-control
+    points (EPSG:4326).
+
+    The returned ``sigma0`` is **uncalibrated relative intensity** -- the digital
+    number squared (intensity is proportional to amplitude squared). This is
+    adequate for qualitative detection and visualisation (the downstream dB +
+    normalisation window absorbs the unknown absolute scale), but it is NOT
+    radiometrically calibrated sigma-nought; use :func:`calibrate_safe` when full
+    calibration is available. The GCP-derived affine is an approximation of the
+    range/azimuth geometry (sub-pixel-exact only at the GCPs).
+
+    Parameters
+    ----------
+    safe_path, polarisation:
+        As :func:`calibrate_safe`.
+    bbox:
+        Optional ``(min_lon, min_lat, max_lon, max_lat)`` to read only a window,
+        bounding memory for large scenes. The returned transform is offset to the
+        window.
+    """
+    import rasterio
+    from affine import Affine
+    from rasterio.transform import from_gcps
+    from rasterio.windows import Window
+
+    safe = Path(safe_path)
+    pol = polarisation.lower()
+    tifs = sorted(safe.glob(f"measurement/*-{pol}-*.tiff"))
+    if not tifs:
+        raise FileNotFoundError(f"no {pol} measurement GeoTIFF under {safe}")
+
+    with rasterio.open(tifs[0]) as ds:
+        gcps, gcp_crs = ds.gcps
+        if not gcps:
+            raise ValueError(f"{tifs[0].name} has no GCPs to georeference from")
+        full_transform = from_gcps(gcps)
+        crs = gcp_crs or CRS.from_epsg(4326)
+
+        if bbox is not None:
+            # The GCP affine can be rotated/flipped (e.g. descending passes), so
+            # rasterio.windows.from_bounds (which assumes a north-up transform) is
+            # not reliable. Inverse-map the four bbox corners to pixel coords and
+            # take their bounding box as the read window.
+            min_lon, min_lat, max_lon, max_lat = bbox
+            inv = ~full_transform
+            corners = [
+                (min_lon, min_lat),
+                (min_lon, max_lat),
+                (max_lon, min_lat),
+                (max_lon, max_lat),
+            ]
+            # Affine supports ``transform * (x, y) -> (col, row)`` at runtime.
+            pixel_coords = [inv * (lon, lat) for lon, lat in corners]  # type: ignore[operator]
+            cols = [c for c, _ in pixel_coords]
+            rows = [r for _, r in pixel_coords]
+            col_off = max(0, int(np.floor(min(cols))))
+            row_off = max(0, int(np.floor(min(rows))))
+            col_end = min(ds.width, int(np.ceil(max(cols))))
+            row_end = min(ds.height, int(np.ceil(max(rows))))
+            if col_end <= col_off or row_end <= row_off:
+                raise ValueError("bbox does not overlap the scene footprint")
+            window = Window(col_off, row_off, col_end - col_off, row_end - row_off)  # type: ignore[call-arg]
+            dn = ds.read(1, window=window).astype(np.float64)
+            transform = full_transform * Affine.translation(col_off, row_off)
+        else:
+            dn = ds.read(1).astype(np.float64)
+            transform = full_transform
+
+    # Amplitude DN -> relative intensity (proportional to sigma0 up to a constant).
+    intensity = dn * dn
+    return CalibratedScene(sigma0=intensity, transform=transform, crs=crs)
+
+
+def _acquisition_mode(safe: Path, xs: object) -> str:
+    """Determine the S1 acquisition mode group (e.g. ``IW``, ``EW``).
+
+    Prefers the product-name token (``S1B_IW_GRDH_...`` -> ``IW``); if absent,
+    inspects the root dataset's subgroup attribute and picks the first mode group.
+    """
+    for token in safe.name.split("_"):
+        if token in ("IW", "EW", "WV"):
+            return token
+    # Fallback: read the root dataset's advertised subgroups.
+    root = xs.open_sentinel1_dataset(str(safe))  # type: ignore[attr-defined]
+    subgroups = str(root.attrs.get("subgroups", "")).replace("[", " ").replace("]", " ")
+    for candidate in ("IW", "EW", "WV"):
+        if candidate in subgroups:
+            return candidate
+    raise ValueError(f"could not determine acquisition mode for {safe.name}")
 
 
 def _georef_from_dataarray(da: xr.DataArray) -> tuple[Affine, CRS]:

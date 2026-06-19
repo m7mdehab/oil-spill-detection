@@ -210,3 +210,38 @@ def test_calibrate_safe_end_to_end() -> None:
     assert scene.sigma0.ndim == 2
     assert np.isfinite(scene.sigma0).any()
     assert (scene.sigma0 >= 0.0).all()  # linear-power sigma0 is non-negative
+
+
+def test_read_grd_measurement_with_gcps(tmp_path: object) -> None:
+    """read_grd_measurement reads DN^2 with a GCP-derived transform, incl. bbox crop."""
+    import numpy as np
+    import rasterio
+    from rasterio.control import GroundControlPoint
+    from rasterio.crs import CRS
+
+    from oilspill.pipeline.preprocess import read_grd_measurement
+
+    meas = tmp_path / "T.SAFE" / "measurement"  # type: ignore[operator]
+    meas.mkdir(parents=True)
+    h, w = 40, 50
+    dn = np.arange(h * w, dtype="uint16").reshape(h, w) % 500 + 1
+    # GCPs mapping image corners to a lon/lat box (north-up here for simplicity).
+    gcps = [
+        GroundControlPoint(row=0, col=0, x=57.0, y=-20.0),
+        GroundControlPoint(row=0, col=w, x=57.5, y=-20.0),
+        GroundControlPoint(row=h, col=0, x=57.0, y=-20.5),
+        GroundControlPoint(row=h, col=w, x=57.5, y=-20.5),
+    ]
+    tif = meas / "s1b-iw-grd-vv-x.tiff"
+    with rasterio.open(tif, "w", driver="GTiff", height=h, width=w, count=1, dtype="uint16") as dst:
+        dst.write(dn, 1)
+        dst.gcps = (gcps, CRS.from_epsg(4326))
+
+    full = read_grd_measurement(meas.parent, "vv")
+    assert full.sigma0.shape == (h, w)
+    assert np.allclose(full.sigma0, dn.astype("float64") ** 2)  # DN^2 relative intensity
+    assert full.crs.to_epsg() == 4326
+
+    cropped = read_grd_measurement(meas.parent, "vv", bbox=(57.1, -20.4, 57.4, -20.1))
+    assert cropped.sigma0.shape[0] < h and cropped.sigma0.shape[1] < w
+    assert cropped.sigma0.size > 0
