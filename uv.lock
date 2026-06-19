@@ -2181,12 +2181,9 @@ name = "oilspill"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
-    { name = "albumentations" },
     { name = "fastapi" },
     { name = "geopandas" },
     { name = "httpx" },
-    { name = "matplotlib" },
-    { name = "mlflow" },
     { name = "numpy" },
     { name = "onnx" },
     { name = "onnxruntime" },
@@ -2204,15 +2201,11 @@ dependencies = [
     { name = "rioxarray", version = "0.22.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
     { name = "sarsen" },
     { name = "scipy" },
-    { name = "segmentation-models-pytorch" },
     { name = "shapely" },
     { name = "torch", version = "2.12.0", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "platform_machine != 's390x' and sys_platform == 'darwin'" },
     { name = "torch", version = "2.12.0+cpu", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "platform_machine == 's390x' or sys_platform != 'darwin'" },
     { name = "torchmetrics" },
-    { name = "torchvision", version = "0.27.0", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "platform_machine != 's390x' and sys_platform == 'darwin'" },
-    { name = "torchvision", version = "0.27.0+cpu", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "platform_machine == 's390x' or sys_platform != 'darwin'" },
     { name = "tqdm" },
-    { name = "transformers" },
     { name = "uvicorn" },
     { name = "xarray" },
     { name = "xarray-sentinel" },
@@ -2220,24 +2213,37 @@ dependencies = [
 
 [package.dev-dependencies]
 dev = [
+    { name = "albumentations" },
+    { name = "matplotlib" },
+    { name = "mlflow" },
     { name = "pre-commit" },
     { name = "pyright" },
     { name = "pytest" },
     { name = "pytest-cov" },
     { name = "ruff" },
+    { name = "segmentation-models-pytorch" },
+    { name = "torchvision", version = "0.27.0", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "platform_machine != 's390x' and sys_platform == 'darwin'" },
+    { name = "torchvision", version = "0.27.0+cpu", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "platform_machine == 's390x' or sys_platform != 'darwin'" },
+    { name = "transformers" },
 ]
 gpu = [
     { name = "modal" },
 ]
+ml = [
+    { name = "albumentations" },
+    { name = "matplotlib" },
+    { name = "mlflow" },
+    { name = "segmentation-models-pytorch" },
+    { name = "torchvision", version = "0.27.0", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "platform_machine != 's390x' and sys_platform == 'darwin'" },
+    { name = "torchvision", version = "0.27.0+cpu", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "platform_machine == 's390x' or sys_platform != 'darwin'" },
+    { name = "transformers" },
+]
 
 [package.metadata]
 requires-dist = [
-    { name = "albumentations" },
     { name = "fastapi" },
     { name = "geopandas" },
     { name = "httpx" },
-    { name = "matplotlib" },
-    { name = "mlflow" },
     { name = "numpy" },
     { name = "onnx" },
     { name = "onnxruntime" },
@@ -2253,13 +2259,10 @@ requires-dist = [
     { name = "rioxarray" },
     { name = "sarsen" },
     { name = "scipy" },
-    { name = "segmentation-models-pytorch" },
     { name = "shapely" },
     { name = "torch", index = "https://download.pytorch.org/whl/cpu" },
     { name = "torchmetrics" },
-    { name = "torchvision", index = "https://download.pytorch.org/whl/cpu" },
     { name = "tqdm" },
-    { name = "transformers" },
     { name = "uvicorn" },
     { name = "xarray" },
     { name = "xarray-sentinel" },
@@ -2267,13 +2270,27 @@ requires-dist = [
 
 [package.metadata.requires-dev]
 dev = [
+    { name = "albumentations" },
+    { name = "matplotlib" },
+    { name = "mlflow" },
     { name = "pre-commit" },
     { name = "pyright" },
     { name = "pytest" },
     { name = "pytest-cov" },
     { name = "ruff" },
+    { name = "segmentation-models-pytorch" },
+    { name = "torchvision", index = "https://download.pytorch.org/whl/cpu" },
+    { name = "transformers" },
 ]
 gpu = [{ name = "modal" }]
+ml = [
+    { name = "albumentations" },
+    { name = "matplotlib" },
+    { name = "mlflow" },
+    { name = "segmentation-models-pytorch" },
+    { name = "torchvision", index = "https://download.pytorch.org/whl/cpu" },
+    { name = "transformers" },
+]
 
 [[package]]
 name = "onnx"

@@ -9,23 +9,20 @@ description = "SAR oil spill detection: training, evaluation, Sentinel-1 pipelin
 readme = "README.md"
 license = { file = "LICENSE" }
 requires-python = ">=3.11"
+# Runtime dependencies for the serving path (API + inference + geospatial
+# pipeline). The training/evaluation-only stack (smp, transformers, torchvision,
+# albumentations, mlflow, matplotlib) lives in the `ml` group below so the
+# deployed container stays lean. torch + torchmetrics stay here because the
+# metrics module (used across the package) needs them.
 dependencies = [
-    # Deep learning
+    # Deep learning (metrics + tensors)
     "torch",
-    "torchvision",
-    "segmentation-models-pytorch",
-    "transformers",
     "torchmetrics",
     # Core scientific stack
     "numpy",
     "scipy",
     "pillow",
-    "matplotlib",
     "pyyaml",
-    # Augmentation
-    "albumentations",
-    # Experiment tracking
-    "mlflow",
     # Inference / serving
     "onnx",
     "onnxruntime",
@@ -51,12 +48,24 @@ dependencies = [
 ]
 
 [dependency-groups]
+# Training & evaluation stack: model architectures, augmentation, tracking,
+# plotting. Required for training/eval and the full test suite, but NOT for the
+# serving container. Included in `dev` so `make check` and CI have them.
+ml = [
+    "torchvision",
+    "segmentation-models-pytorch",
+    "transformers",
+    "albumentations",
+    "mlflow",
+    "matplotlib",
+]
 dev = [
     "ruff",
     "pyright",
     "pytest",
     "pytest-cov",
     "pre-commit",
+    {include-group = "ml"},
 ]
 # Infra for launching GPU training on Modal. Not installed by CI (which is
 # CPU-only and never trains); install locally with `uv sync --group gpu`.
