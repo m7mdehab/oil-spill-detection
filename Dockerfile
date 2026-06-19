@@ -4,19 +4,20 @@
 FROM node:20-slim AS web
 WORKDIR /web
 COPY web/package.json web/package-lock.json ./
-RUN npm ci
+# `npm install` (not `npm ci`): the committed lock may have been generated on a
+# different OS and omit the host's platform-specific optional deps (e.g. rollup's
+# native binary), which breaks the Vite build on linux. install resolves them.
+RUN npm install --no-audit --no-fund
 COPY web/ ./
 RUN npm run build   # -> /web/dist
 
 # ---- Stage 2: python runtime serving the API + static frontend ----
-FROM python:3.11-slim-bookworm AS runtime
-
-# uv for fast, locked installs.
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+# Official uv image (uv + a system Python 3.11 preinstalled) -- the documented,
+# reliable base for uv-managed projects.
+FROM ghcr.io/astral-sh/uv:python3.11-bookworm-slim AS runtime
 
 ENV UV_COMPILE_BYTECODE=1 \
     UV_LINK_MODE=copy \
-    UV_PYTHON_DOWNLOADS=never \
     PORT=7860 \
     PYTHONUNBUFFERED=1
 
