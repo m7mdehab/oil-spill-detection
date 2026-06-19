@@ -15,7 +15,7 @@ check:
 	uv run ruff check .
 	uv run ruff format --check .
 	uv run pyright
-	uv run pytest -m "not slow"
+	uv run pytest -m "not slow" --cov=src/oilspill --cov-report=term-missing
 
 fmt:
 	uv run ruff format .

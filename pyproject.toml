@@ -108,3 +108,24 @@ addopts = "-q"
 markers = [
     "slow: slow tests (full training, large downloads)",
 ]
+
+[tool.coverage.run]
+source = ["src/oilspill"]
+branch = false
+omit = [
+    # The epoch loop / optimiser / AMP / MLflow plumbing only runs meaningfully
+    # on a real (GPU) training run. It is exercised end-to-end by the smoke
+    # train (`make train-smoke`), not by fast unit tests, so excluding it keeps
+    # the coverage signal focused on unit-testable serving/eval/data code.
+    "src/oilspill/training/trainer.py",
+]
+
+[tool.coverage.report]
+fail_under = 80
+show_missing = true
+exclude_lines = [
+    "pragma: no cover",
+    "if TYPE_CHECKING:",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+]
