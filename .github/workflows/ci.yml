@@ -23,3 +23,24 @@ jobs:
 
       - name: Lint, type-check, and test
         run: make check
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build image
+        run: docker build -t oilspill-app .
+
+      - name: Start container and check health
+        run: |
+          docker run -d --name oilspill -p 7860:7860 oilspill-app
+          for i in $(seq 1 30); do
+            if curl -fsS http://localhost:7860/healthz; then echo "healthy"; exit 0; fi
+            sleep 5
+          done
+          echo "container did not become healthy"; docker logs oilspill; exit 1
+
+      - name: Report image size
+        if: always()
+        run: docker image inspect oilspill-app --format 'image size: {{.Size}} bytes' || true
