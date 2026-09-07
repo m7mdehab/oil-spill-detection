@@ -1,0 +1,8 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it using the metadata below."
+title: "Oil Spill Detection from Sentinel-1 SAR"
+type: software
+authors:
+  - family-names: "ElNomany"
+    given-names: "Mohammed Ehab"
+repository-code: "https://github.com/m7mdehab/oil-spill-detection"
